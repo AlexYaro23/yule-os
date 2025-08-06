@@ -1,16 +1,25 @@
 import asyncio
-from typing import Dict, List, Optional, TypeVar, Union, Any, Callable
+from typing import Dict, Optional, TypeVar, Union, Any, Callable
 
 from websockets import ClientConnection, HeadersLike
 import websockets
-from hibachi_xyz.types import ExchangeInfo, FutureContract, MaintenanceWindow
+from hibachi_xyz.types import ExchangeInfo, MaintenanceWindow
 from datetime import datetime
 from prettyprinter import cpprint
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
+from decimal import Decimal
 import inspect
 
 default_api_url = "https://api.hibachi.xyz"
 default_data_api_url = "https://data-api.hibachi.xyz"
+
+
+Numeric = Union[int, float, Decimal]
+
+
+def full_precision_string(n: Numeric) -> Decimal:
+    return format(Decimal(str(n)).normalize(), "f")
+
 
 # allow an object to be created from any superset of the required args
 # intending to future proof against updates adding fields

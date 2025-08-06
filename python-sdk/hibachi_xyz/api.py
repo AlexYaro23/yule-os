@@ -1,24 +1,19 @@
 from dataclasses import asdict
-from enum import Enum
 from hashlib import sha256
 import hmac
-import json
 from math import floor
 from time import time, time_ns
-from typing import Any, Dict, Optional, TypeAlias, List, Tuple, Union
+from typing import Any, Dict, Optional
 
 from eth_keys import keys
 import requests
 
 from hibachi_xyz.types import (
-    BatchOrder,
     BatchResponse,
     BatchResponseOrder,
     ExchangeInfo,
-    FeeConfig,
     FutureContract,
     MaintenanceWindow,
-    Order,
     OrderIdVariant,
     PendingOrdersResponse,
     TriggerDirection,
@@ -69,7 +64,12 @@ from hibachi_xyz.types import (
     CancelOrder,
 )
 
-from hibachi_xyz.helpers import create_with, default_api_url, default_data_api_url
+from hibachi_xyz.helpers import (
+    create_with,
+    default_api_url,
+    default_data_api_url,
+    full_precision_string,
+)
 
 
 def price_to_bytes(price: float, contract: FutureContract) -> bytes:
@@ -162,7 +162,7 @@ class HibachiApiClient:
             private_key_bytes = bytes.fromhex(private_key)
             self._private_key = keys.PrivateKey(private_key_bytes)
 
-        if private_key.startswith("0x") == False:
+        if private_key.startswith("0x") is False:
             self._private_key_hmac = private_key
 
     """ Market API endpoints, can be called without having an account """
@@ -1015,7 +1015,7 @@ class HibachiApiClient:
         )
         request_data["accountId"] = self.account_id
         response = self.__send_authorized_request(
-            "POST", f"/trade/order", json=request_data
+            "POST", "/trade/order", json=request_data
         )
         order_id = int(response["orderId"])
         return (nonce, order_id)
@@ -1081,7 +1081,7 @@ class HibachiApiClient:
         )
         request_data["accountId"] = self.account_id
         response = self.__send_authorized_request(
-            "POST", f"/trade/order", json=request_data
+            "POST", "/trade/order", json=request_data
         )
         order_id = int(response["orderId"])
         return (nonce, order_id)
@@ -1127,7 +1127,7 @@ class HibachiApiClient:
         request_data = {"accountId": int(self.account_id), "orders": orders_data}
 
         result = self.__send_authorized_request(
-            "POST", f"/trade/orders", json=request_data
+            "POST", "/trade/orders", json=request_data
         )
         orders = [create_with(BatchResponseOrder, order) for order in result["orders"]]
         if len(orders) < 1:
@@ -1161,7 +1161,6 @@ class HibachiApiClient:
         """
         self.__check_auth_data()
         order = self.get_order_details(order_id=order_id)
-        symbol = order.symbol
 
         request_data_two = self._update_order_generate_sig(
             order,
@@ -1174,7 +1173,7 @@ class HibachiApiClient:
         )
 
         return self.__send_authorized_request(
-            "PUT", f"/trade/order", json=request_data_two
+            "PUT", "/trade/order", json=request_data_two
         )
 
     def _update_order_generate_sig(
@@ -1248,7 +1247,7 @@ class HibachiApiClient:
         request_data = self._cancel_order_request_data(order_id, nonce, True)
         request_data["accountId"] = int(self.account_id)
         return self.__send_authorized_request(
-            "DELETE", f"/trade/order", json=request_data
+            "DELETE", "/trade/order", json=request_data
         )
 
     def cancel_all_orders(self, contractId: Optional[int] = None) -> Dict[str, Any]:
@@ -1277,7 +1276,7 @@ class HibachiApiClient:
             request_data = self._cancel_order_request_data(None, nonce, False)
             request_data["accountId"] = int(self.account_id)
             return self.__send_authorized_request(
-                "DELETE", f"/trade/orders", json=request_data
+                "DELETE", "/trade/orders", json=request_data
             )
 
     def batch_orders(
@@ -1336,7 +1335,7 @@ class HibachiApiClient:
         request_data = {"accountId": int(self.account_id), "orders": orders_data}
 
         result = self.__send_authorized_request(
-            "POST", f"/trade/orders", json=request_data
+            "POST", "/trade/orders", json=request_data
         )
         orders = [create_with(BatchResponseOrder, order) for order in result["orders"]]
         result["orders"] = orders
@@ -1476,17 +1475,17 @@ class HibachiApiClient:
         request = {
             "nonce": nonce,
             "symbol": symbol,
-            "quantity": str(quantity),
+            "quantity": full_precision_string(quantity),
             "orderType": "MARKET",
             "side": side.value,
-            "maxFeesPercent": str(max_fees_percent),
+            "maxFeesPercent": full_precision_string(max_fees_percent),
             "signature": signature,
         }
         if price is not None:
             request["orderType"] = "LIMIT"
-            request["price"] = str(price)
+            request["price"] = full_precision_string(price)
         if trigger_price is not None:
-            request["triggerPrice"] = str(trigger_price)
+            request["triggerPrice"] = full_precision_string(trigger_price)
             if trigger_direction is not None:
                 request["triggerDirection"] = trigger_direction.value
         if twap_config is not None:
@@ -1521,19 +1520,19 @@ class HibachiApiClient:
         signature = self.__sign_payload(payload)
         request = {
             "nonce": nonce,
-            "updatedQuantity": str(quantity),
-            "quantity": str(quantity),
-            "maxFeesPercent": str(max_fees_percent),
+            "updatedQuantity": full_precision_string(quantity),
+            "quantity": full_precision_string(quantity),
+            "maxFeesPercent": full_precision_string(max_fees_percent),
             "signature": signature,
         }
         if price is not None:
-            request["updatedPrice"] = str(price)
-            request["price"] = str(price)
+            request["updatedPrice"] = full_precision_string(price)
+            request["price"] = full_precision_string(price)
         if order_id is not None:
             request["orderId"] = str(order_id)
         if trigger_price is not None:
-            request["updatedTriggerPrice"] = str(trigger_price)
-            request["trigger_price"] = str(trigger_price)
+            request["updatedTriggerPrice"] = full_precision_string(trigger_price)
+            request["trigger_price"] = full_precision_string(trigger_price)
         if creation_deadline is not None:
             deadline = floor(time()) + creation_deadline
             request["creationDeadline"] = deadline

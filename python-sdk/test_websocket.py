@@ -1,10 +1,7 @@
 import asyncio
 import json
-import os
-import time
 
 import pytest
-from dotenv import load_dotenv
 from hibachi_xyz.api_ws_account import HibachiWSAccountClient
 from hibachi_xyz.api_ws_market import HibachiWSMarketClient
 from hibachi_xyz.api_ws_trade import HibachiWSTradeClient
@@ -13,23 +10,10 @@ from hibachi_xyz.helpers import print_data
 from hibachi_xyz.types import (
     AccountSnapshot,
     Nonce,
-    OrderModifyParams,
     OrderPlaceParams,
-    OrderPlaceResponse,
-    OrderStatus,
     OrderType,
     Position,
     Side,
-    WebSocketBatchOrder,
-    WebSocketOrderCancelParams,
-    WebSocketOrderModifyParams,
-    WebSocketOrdersBatchParams,
-    WebSocketOrdersCancelParams,
-    WebSocketOrdersStatusParams,
-    WebSocketOrderStatusParams,
-    WebSocketStreamPingParams,
-    WebSocketStreamStartParams,
-    WebSocketStreamStopParams,
     WebSocketSubscription,
     WebSocketSubscriptionTopic,
 )
@@ -104,7 +88,7 @@ async def test_trade_websocket():
         current_price = client.api.get_prices("BTC/USDT-P")
         print(f"current_price: {current_price}")
 
-        start_order_count = len(client.api.get_pending_orders().orders)
+        len(client.api.get_pending_orders().orders)
 
         (nonce, order_id) = client.api.place_limit_order(
             symbol="BTC/USDT-P",
@@ -125,7 +109,7 @@ async def test_trade_websocket():
 
         # test cancel using websocket
 
-        result_of_cancel_all_orders = await client.cancel_all_orders()
+        await client.cancel_all_orders()
 
         assert len(client.api.get_pending_orders().orders) == 0
 
