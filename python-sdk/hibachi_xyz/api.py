@@ -263,14 +263,13 @@ class HibachiApiClient:
                 contract: {
                     displayName: str
                     id: int
-                    maintenanceFactorForPositions: str
                     marketCloseTimestamp: Optional[str]
                     marketOpenTimestamp: Optional[str]
                     minNotional: str
                     minOrderSize: str
                     orderbookGranularities: List[str]
-                    riskFactorForOrders: str
-                    riskFactorForPositions: str
+                    initialMarginRate: str
+                    maintenanceMarginRate: str
                     settlementDecimals: int
                     settlementSymbol: str
                     status: str
