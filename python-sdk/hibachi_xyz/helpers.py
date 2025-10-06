@@ -1,8 +1,8 @@
 import asyncio
-from typing import Dict, Optional, TypeVar, Union, Any, Callable
+from typing import Dict, TypeVar, Union, Any, Callable
 
-from websockets import ClientConnection, HeadersLike
-import websockets
+from hibachi_xyz.executors.interface import WsConnection
+from hibachi_xyz.executors.websockets import WebsocketsWsExecutor
 from hibachi_xyz.types import ExchangeInfo, MaintenanceWindow
 from datetime import datetime
 from prettyprinter import cpprint
@@ -12,8 +12,8 @@ from functools import lru_cache
 import inspect
 
 
-default_api_url = "https://api.hibachi.xyz"
-default_data_api_url = "https://data-api.hibachi.xyz"
+DEFAULT_API_URL: str = "https://api.hibachi.xyz"
+DEFAULT_DATA_API_URL: str = "https://data-api.hibachi.xyz"
 
 
 Numeric = Union[int, float, Decimal]
@@ -26,7 +26,7 @@ def get_hibachi_client() -> str:
     return f"HibachiPythonSDK/{hibachi_xyz.__version__}"
 
 
-def full_precision_string(n: Numeric) -> Decimal:
+def full_precision_string(n: Numeric) -> str:
     return format(Decimal(str(n)).normalize(), "f")
 
 
@@ -43,16 +43,19 @@ def create_with(func: Callable[..., T], data: Dict[str, Any]) -> T:
 
 
 async def connect_with_retry(
-    web_url: str, headers: Optional[HeadersLike] = None
-) -> ClientConnection:
+    web_url: str, headers: list[tuple[str, str]] | None = None
+) -> WsConnection:
     """Establish WebSocket connection with retry logic"""
     max_retries = 10
     retry_count = 0
     retry_delay = 1
+    executor = WebsocketsWsExecutor()
 
     while retry_count < max_retries:
         try:
-            websocket = await websockets.connect(web_url, additional_headers=headers)
+            # Convert headers list to dict for executor
+            headers_dict = dict(headers) if headers else None
+            websocket = await executor.connect(web_url, headers_dict)
             return websocket
         except Exception as e:
             retry_count += 1
@@ -103,7 +106,7 @@ def get_withdrawal_fee_for_amount(exchange_info: ExchangeInfo, amount: float) ->
 
 def get_next_maintenance_window(
     exchange_info: ExchangeInfo,
-) -> Optional[MaintenanceWindow]:
+) -> MaintenanceWindow | None:
     """
     Get the next maintenance window if any exists.
 
@@ -111,7 +114,7 @@ def get_next_maintenance_window(
         exchange_info: The exchange information
 
     Returns:
-        Optional[Dict]: Details about the next maintenance window or None if none exists
+        Optional[Dict | None: Details about the next maintenance window or None if none exists
     """
     windows = exchange_info.maintenanceWindow
     if not windows:
