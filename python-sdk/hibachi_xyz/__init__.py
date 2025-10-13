@@ -5,9 +5,6 @@ from pathlib import Path
 import toml
 
 from hibachi_xyz.api import HibachiApiClient, price_to_bytes
-from hibachi_xyz.api_ws_account import HibachiWSAccountClient
-from hibachi_xyz.api_ws_market import HibachiWSMarketClient
-from hibachi_xyz.api_ws_trade import HibachiWSTradeClient
 from hibachi_xyz.errors import (
     BaseError,
     DeserializationError,

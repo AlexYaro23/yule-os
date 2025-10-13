@@ -18,8 +18,6 @@ from hibachi_xyz.errors import (
     MaintanenceOutage,
     SerializationError,
 )
-from hibachi_xyz.executors.interface import WsConnection
-from hibachi_xyz.executors.websockets import WebsocketsWsExecutor
 from hibachi_xyz.types import (
     BatchResponseOrder,
     CancelOrderBatchResponse,
@@ -257,41 +255,6 @@ def create_with(
 # TODO this should be able to return a float but api server currently can't handle that
 def absolute_creation_deadline(relative_creation_deadline: Decimal) -> int:
     return int(relative_creation_deadline + Decimal(time()))
-
-
-async def connect_with_retry(
-    web_url: str, headers: list[tuple[str, str]] | None = None
-) -> WsConnection:
-    """Establish WebSocket connection with retry logic"""
-    max_retries = 10
-    retry_count = 0
-    retry_delay = 1
-    executor = WebsocketsWsExecutor()
-
-    while retry_count < max_retries:
-        try:
-            # Convert headers list to dict for executor
-            headers_dict = dict(headers) if headers else None
-            websocket = await executor.connect(web_url, headers_dict)
-            return websocket
-        except Exception as e:
-            retry_count += 1
-            if retry_count >= max_retries:
-                raise Exception(
-                    f"Failed to connect after {max_retries} attempts: {str(e)}"
-                )
-
-            log.warning(
-                "Connection attempt %d failed: %s. Retrying in %d seconds...",
-                retry_count,
-                str(e),
-                retry_delay,
-            )
-            await asyncio.sleep(retry_delay)
-            retry_delay *= 2  # Exponential backoff
-
-    # This shouldn't be reached due to the exception in the loop
-    return websocket
 
 
 def print_data(response: Any) -> None:

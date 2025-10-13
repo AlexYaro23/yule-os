@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hibachi_xyz"
-version = "0.2.0"
+version = "0.2.1"
 authors = [
  { name = "Hibachi Engineer" }
 ]
@@ -17,7 +17,6 @@ dependencies = [
   "requests == 2.32.3",
   "httpx >= 0.27.0",
   "toml == 0.10.2",
-  "websockets >= 11.0.3",
   "python-dotenv >= 1.0.0",
   "prettyprinter >= 0.18.0",
   "pip-system-certs",
@@ -49,7 +48,7 @@ Issues = "https://github.com/hibachi-xyz/yule-os/issues"
 
 [tool.ruff]
 # Target Python 3.13+
-target-version = "py313"
+target-version = "py311"
 
 [tool.ruff.format]
 # Use double quotes for strings
@@ -69,7 +68,7 @@ select = ["E", "F", "I"]
 ignore = ["E501"]  # Ignore line too long
 
 [tool.mypy]
-python_version = "3.13"
+python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true

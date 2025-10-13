@@ -29,55 +29,55 @@ print(prices)
 
 print("="*100)
 
-# Place market order to open position
-(nonce, order_id) = hibachi.place_market_order(
-    symbol="BTC/USDT-P",
-    quantity=0.0001,
-    side=Side.BUY,
-    max_fees_percent=float(exch_info.feeConfig.tradeTakerFeeRate) * 2.0,
-)
+# # Place market order to open position
+# (nonce, order_id) = hibachi.place_market_order(
+#     symbol="BTC/USDT-P",
+#     quantity=0.0001,
+#     side=Side.BUY,
+#     max_fees_percent=float(exch_info.feeConfig.tradeTakerFeeRate) * 2.0,
+# )
 
-print(f"Market Order Placed: Nonce: {nonce}, Order ID: {order_id}")
+# print(f"Market Order Placed: Nonce: {nonce}, Order ID: {order_id}")
 
-# 1. Sleep 5 seconds
-print("Sleeping 5 seconds...")
-time.sleep(5)
+# # 1. Sleep 5 seconds
+# print("Sleeping 5 seconds...")
+# time.sleep(5)
 
-# 2. Print open positions
-print("\nOpen Positions:")
-print("="*50)
-account_info = hibachi.get_account_info()
-for position in account_info.positions:
-    print(f"Position: {position.symbol} - Quantity: {position.quantity} - Direction: {position.direction}")
+# # 2. Print open positions
+# print("\nOpen Positions:")
+# print("="*50)
+# account_info = hibachi.get_account_info()
+# for position in account_info.positions:
+#     print(f"Position: {position.symbol} - Quantity: {position.quantity} - Direction: {position.direction}")
 
-# 3. Sleep 30 seconds
-print("\nSleeping 30 seconds...")
-time.sleep(30)
+# # 3. Sleep 30 seconds
+# print("\nSleeping 30 seconds...")
+# time.sleep(30)
 
-# 4. Close market position using data from open positions
-print("\nClosing positions...")
-account_info = hibachi.get_account_info()
-for position in account_info.positions:
-    if position.symbol == "BTC/USDT-P" and float(position.quantity) > 0:
-        print(f"Closing position: {position.symbol} - Quantity: {position.quantity}")
-        (close_nonce, close_order_id) = hibachi.place_market_order(
-            symbol=position.symbol,
-            quantity=float(position.quantity),
-            side=Side.SELL,  # Opposite side to close the position
-            max_fees_percent=float(exch_info.feeConfig.tradeTakerFeeRate) * 2.0,
-        )
-        print(f"Close Order Placed: Nonce: {close_nonce}, Order ID: {close_order_id}")
+# # 4. Close market position using data from open positions
+# print("\nClosing positions...")
+# account_info = hibachi.get_account_info()
+# for position in account_info.positions:
+#     if position.symbol == "BTC/USDT-P" and float(position.quantity) > 0:
+#         print(f"Closing position: {position.symbol} - Quantity: {position.quantity}")
+#         (close_nonce, close_order_id) = hibachi.place_market_order(
+#             symbol=position.symbol,
+#             quantity=float(position.quantity),
+#             side=Side.SELL,  # Opposite side to close the position
+#             max_fees_percent=float(exch_info.feeConfig.tradeTakerFeeRate) * 2.0,
+#         )
+#         print(f"Close Order Placed: Nonce: {close_nonce}, Order ID: {close_order_id}")
 
-# 5. Sleep 5 seconds
-print("\nSleeping 5 seconds...")
-time.sleep(5)
+# # 5. Sleep 5 seconds
+# print("\nSleeping 5 seconds...")
+# time.sleep(5)
 
-# 6. Print open positions
-print("\nFinal Open Positions:")
-print("="*50)
-account_info = hibachi.get_account_info()
-for position in account_info.positions:
-    print(f"Position: {position.symbol} - Quantity: {position.quantity} - Direction: {position.direction}")
+# # 6. Print open positions
+# print("\nFinal Open Positions:")
+# print("="*50)
+# account_info = hibachi.get_account_info()
+# for position in account_info.positions:
+#     print(f"Position: {position.symbol} - Quantity: {position.quantity} - Direction: {position.direction}")
 
-print("="*100)
+# print("="*100)
 
