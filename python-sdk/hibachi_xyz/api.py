@@ -146,6 +146,7 @@ class HibachiApiClient:
         api_key: str | None = None,
         private_key: str | None = None,
         executor: HttpExecutor | None = None,
+        proxy: str | None = None,
     ):
         if private_key is not None:
             self.set_private_key(private_key)
@@ -154,6 +155,7 @@ class HibachiApiClient:
             api_url=api_url,
             data_api_url=data_api_url,
             api_key=api_key,
+            proxy=proxy,
         )
         self.set_api_key(api_key)
         self.set_account_id(account_id)
