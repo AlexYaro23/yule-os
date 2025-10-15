@@ -39,10 +39,12 @@ class RequestsHttpExecutor(HttpExecutor):
         api_url: str = DEFAULT_API_URL,
         data_api_url: str = DEFAULT_DATA_API_URL,
         api_key: str | None = None,
+        proxy: str | None = None,
     ):
         self.api_url = api_url
         self.data_api_url = data_api_url
         self.api_key = api_key
+        self.proxy = proxy
 
     @override
     def send_simple_request(self, path: str) -> Json:
@@ -51,6 +53,7 @@ class RequestsHttpExecutor(HttpExecutor):
             response = requests.get(
                 url,
                 headers={"Hibachi-Client": get_hibachi_client()},
+                proxies={"http": self.proxy, "https": self.proxy} if self.proxy else None,
             )
             error = _get_http_error(response)
             if error is not None:
@@ -81,7 +84,13 @@ class RequestsHttpExecutor(HttpExecutor):
                 "Hibachi-Client": get_hibachi_client(),
             }
 
-            response = requests.request(method, url, headers=headers, data=request_body)
+            response = requests.request(
+                method, 
+                url, 
+                headers=headers, 
+                data=request_body,
+                proxies={"http": self.proxy, "https": self.proxy} if self.proxy else None,
+            )
             error = _get_http_error(response)
             if error is not None:
                 raise error
